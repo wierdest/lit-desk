@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playwrite+BE+WAL:wght@100..400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --lit-laroid-width: 320px;
+      --lit-laroid-caption-color: #333;
+      --lit-laroid-icon-bg: #a8a6a6;
+    }
+    body {
+      margin: 0;
+      background: #fafafa;
+      font-family: Arial, sans-serif;
+    }
+    #demo {
+      height: 100vh;
+      display: flex;
+      align-items: stretch;
+    }
+
+  </style>
+</head>
+<body>
+  <div id="demo"></div>
+
+  <script type="module">
+    import { html, render } from 'lit'
+    import '../lit-desk.js'
+    import '../lit-laroid.js'
+
+    render(
+      html`
+        <lit-desk>
+          <lit-laroid
+              slot="template-card"
+              imageUrl='https://picsum.photos/400'
+              caption='A cool moment!!'
+              label='A+!'
+          
+          >
+          <p>This content is in the card 1!</p>
+          </lit-laroid>
+        </lit-desk>
+      `,
+      document.querySelector('#demo')
+    );
+  </script>
+</body>
+</html>
