@@ -88,16 +88,16 @@ export class LitDesk extends LitElement {
 
     ::slotted([slot="card-2"]) {
       position: absolute;
-      top: calc(50% - 8px);
-      left: calc(50% - 8px);
+      top: calc(50% - var(--lit-desk-pile-offset));
+      left: calc(50% - var(--lit-desk-pile-offset));
       transform: translate(-50%, -50%);
       z-index: 2;
     }
 
     ::slotted([slot="card-3"]) {
       position: absolute;
-      top: calc(50% - 16px);
-      left: calc(50% - 16px);
+      top: calc(50% - (var(--lit-desk-pile-offset) * 2));
+      left: calc(50% - (var(--lit-desk-pile-offset) * 2));
       transform: translate(-50%, -50%);
       z-index: 1;
     }
@@ -121,13 +121,11 @@ export class LitDesk extends LitElement {
     const templateCard = this.querySelector('[slot="template-card"]')
     const pile = this.renderRoot.querySelector('.pile-container')
     if (templateCard) {
-      console.log('HEY')
       pile.querySelectorAll('[slot^="card-"]').forEach((el) => el.remove())
       this.slotOrder.forEach((slotName, index) => {
         const clone = templateCard.cloneNode(true)
         console.log('attribute ', slotName)
         clone.setAttribute('slot', slotName)
-        // common mistake!! don't append to the shadow dom (the pile) but to the lightdom
         this.appendChild(clone)
       })
     }
