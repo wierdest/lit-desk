@@ -15,7 +15,6 @@
     "analyze": "cem analyze --litelement",
     "start": "web-dev-server",
     "lint": "standard --fix",
-    "prepare": "husky",
     "test": "web-test-runner --coverage",
     "test:watch": "web-test-runner --watch"
   },
@@ -29,9 +28,7 @@
     "@web/dev-server": "^0.4.6",
     "@web/test-runner": "^0.18.2",
     "eslint": "^8.57.0",
-    "standard": "^17.1.2",
-    "husky": "^9.0.11",
-    "lint-staged": "^15.2.7"
+    "standard": "^17.1.2"
   },
   "customElements": "custom-elements.json",
   "eslintConfig": {
@@ -47,10 +44,5 @@
       "it": "readonly",
       "beforeEach": "readonly"
     }
-  },
-  "lint-staged": {
-    "*.js": [
-      "standard --fix"
-    ]
   }
 }
