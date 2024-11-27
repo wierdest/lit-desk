@@ -102,6 +102,11 @@ export class LitDesk extends LitElement {
       z-index: 1;
     }
   `
+
+  static properties = {
+    dataSource: { attribute: false }
+  }
+
   constructor () {
     super()
     this.slotOrder = ['card-1', 'card-2', 'card-3']

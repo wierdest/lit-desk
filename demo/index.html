@@ -27,12 +27,26 @@
   </style>
 </head>
 <body>
+  <!-- <script src="../src/utils/fakeJsonMaker.js"></script> -->
   <div id="demo"></div>
 
   <script type="module">
     import { html, render } from 'lit'
     import '../lit-desk.js'
     import '../lit-laroid.js'
+    import { makeFakeJson } from '../src/utils/fakeJsonMaker.js'
+
+    const model = {
+      id: 'number',
+      user: 'string',
+      email: 'email',
+      date: 'date',
+      imageUrl: 'picsum400',
+      caption: 'string',
+      label: 'string'
+    }
+
+    const fakeDataSet = makeFakeJson(model, 10)
 
     render(
       html`
@@ -49,7 +63,7 @@
         </lit-desk>
       `,
       document.querySelector('#demo')
-    );
+    )
   </script>
 </body>
 </html>
