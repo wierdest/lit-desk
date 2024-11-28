@@ -47,10 +47,10 @@
     }
 
     const fakeDataSet = makeFakeJson(model, 10)
-
+    console.log('fake data set ', fakeDataSet)
     render(
       html`
-        <lit-desk>
+        <lit-desk .dataSource="${fakeDataSet}">
           <lit-laroid
               slot="template-card"
               imageUrl='https://picsum.photos/400'

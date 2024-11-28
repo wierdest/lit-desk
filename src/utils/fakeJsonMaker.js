@@ -27,17 +27,18 @@
  */
 
 export function makeFakeJson (model, quantity) {
+  let indexBeingGenerated = -1
   const generateValue = (value) => {
     if (typeof value === 'string') {
       if (value.toLowerCase() === 'string') {
         return Math.random().toString(36).substring(2, 10)
       }
       if (value.toLowerCase() === 'email') {
-        return `user${Math.floor(Math.random() * 1000)}@example.com`;
+        return `user${Math.floor(Math.random() * 1000)}@example.com`
       }
-      if (value.slice(0, 6) === 'picsum') {
-        
-
+      if (value.startsWith('picsum')) {
+        const resolution = value.substring(6)
+        return `https://picsum.photos/${resolution}?random=${indexBeingGenerated}`
       }
       if (value.toLowerCase() === 'date') {
         return new Date(Date.now() - Math.floor(Math.random() * 31536000000)).toISOString()
@@ -64,6 +65,7 @@ export function makeFakeJson (model, quantity) {
 
   const fakeData = []
   for (let i = 0; i < quantity; i++) {
+    indexBeingGenerated = i
     fakeData.push(generateObject(model))
   }
   return fakeData

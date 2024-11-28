@@ -14,6 +14,14 @@ export class LitDesk extends LitElement {
       justify-content: center;
       align-items: center;
       height: 100%;
+      width: 100%;
+    }
+
+    .inner-container {
+      position: relative;
+      display: flex;
+      width: 50%;
+      height: 50%;
     }
 
 
@@ -27,6 +35,7 @@ export class LitDesk extends LitElement {
       display: flex;
       align-items: center;
       justify-content: center;
+      background-color: red;
       cursor: pointer;
     }
     .left-click-area {
@@ -62,22 +71,6 @@ export class LitDesk extends LitElement {
       }
     }
 
-    .pile-container {
-      position: relative;
-      width: 50%;
-      height: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .pile {
-      display: flex;
-      align-items: center;
-      width: 100%;
-      justify-content: center
-    }
-
     ::slotted([slot="card-1"]) {
       position: absolute;
       top: 50%;
@@ -101,6 +94,7 @@ export class LitDesk extends LitElement {
       transform: translate(-50%, -50%);
       z-index: 1;
     }
+    
   `
 
   static properties = {
@@ -124,22 +118,22 @@ export class LitDesk extends LitElement {
 
   firstUpdated () {
     const templateCard = this.querySelector('[slot="template-card"]')
-    const pile = this.renderRoot.querySelector('.pile-container')
+    const pile = this.renderRoot.querySelector('.inner-container')
     if (templateCard) {
       pile.querySelectorAll('[slot^="card-"]').forEach((el) => el.remove())
       this.slotOrder.forEach((slotName, index) => {
         const clone = templateCard.cloneNode(true)
         console.log('attribute ', slotName)
         clone.setAttribute('slot', slotName)
+        clone.setAttribute('imageUrl', this.dataSource[index].imageUrl)
         this.appendChild(clone)
       })
+      templateCard.remove()
     }
   }
 
   handleCardTiltFinished (event) {
     const direction = event.detail.direction
-    console.log('Tilt direction ', direction)
-
     if (direction === 'left') {
       const movedCard = this.slotOrder.shift()
       this.slotOrder.push(movedCard)
@@ -228,16 +222,18 @@ export class LitDesk extends LitElement {
   render () {
     return html`
      <div class="container">
-        <div class="pile-container">
+        <div class="inner-container">
           <div
             class="left-click-area"
             @click="${() => this.sendToBack()}"
           >
           ${this.renderLeftIcon()}
           </div>
-          <slot name="card-1"></slot>
-          <slot name="card-2"></slot>
-          <slot name="card-3"></slot>
+          <div class="slot-container">
+            <slot name="card-1"></slot>
+            <slot name="card-2"></slot>
+            <slot name="card-3"></slot>
+          </div>
           <div
             class="right-click-area"
             @click="${() => this.sendToFront()}"
