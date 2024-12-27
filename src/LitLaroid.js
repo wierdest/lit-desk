@@ -51,8 +51,8 @@ export class LitLaroid extends LitElement {
     }
 
     .caption {
-      padding-top: 10px;
-      font-size: 1.1em;
+      font-size: 1.1rem;
+      padding-left: 1.2rem;
       width: 100%;
       transform: translateX(-1rem) translateY(-1rem) rotate(-7deg);
       color: var(--lit-laroid-caption-color, #333);

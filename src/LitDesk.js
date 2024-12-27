@@ -18,18 +18,14 @@ export class LitDesk extends LitElement {
     }
 
     .inner-container {
-      position: relative;
       display: flex;
-      width: 50%;
-      height: 50%;
+      width: 60%;
+      height: 60%;
     }
 
 
     .left-click-area,
     .right-click-area {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
       width: 30%;
       height: 100%;
       display: flex;
@@ -39,10 +35,26 @@ export class LitDesk extends LitElement {
       cursor: pointer;
     }
     .left-click-area {
+      width: 30%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      background-color: red;
+      cursor: pointer;
       left: 0;
     }
 
     .right-click-area {
+      width: 30%;
+      min-width: 30px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      background-color: red;
+      flex-shrink: 0;
+      cursor: pointer;
       right: 0;
       z-index: 0
     }
@@ -70,31 +82,47 @@ export class LitDesk extends LitElement {
         transform: scale(2)
       }
     }
+    .card-container {
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      height: 0;
+      background-color: blue;
 
-    ::slotted([slot="card-1"]) {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 3
     }
 
-    ::slotted([slot="card-2"]) {
-      position: absolute;
-      top: calc(50% - var(--lit-desk-pile-offset));
-      left: calc(50% - var(--lit-desk-pile-offset));
-      transform: translate(-50%, -50%);
+    .card {
+      margin-top: 4%;
+      transition: z-index 0.3s ease, transform 0.3s ease;
+      transform: translate(var(--horizontalOffset), var(--verticalOffset));
+    }
+
+    .card:nth-child(1) {
+      --verticalOffset: 2%;
+      --horizontalOffset: 0%;
+    }
+
+    .card:nth-child(2) {
+      --verticalOffset: -98%;
+      --horizontalOffset: 4%;
+    }
+
+    .card:nth-child(3) {
+      --verticalOffset: -198%;
+      --horizontalOffset: 8%;
+    }
+
+    .card-1 {
+      z-index: 3;
+    }
+
+    .card-2 {
       z-index: 2;
     }
 
-    ::slotted([slot="card-3"]) {
-      position: absolute;
-      top: calc(50% - (var(--lit-desk-pile-offset) * 2));
-      left: calc(50% - (var(--lit-desk-pile-offset) * 2));
-      transform: translate(-50%, -50%);
+    .card-3 {
       z-index: 1;
     }
-    
   `
 
   static properties = {
@@ -103,7 +131,8 @@ export class LitDesk extends LitElement {
 
   constructor () {
     super()
-    this.slotOrder = ['card-1', 'card-2', 'card-3']
+    this.cardOrder = ['card-3', 'card-2', 'card-1']
+    this.pile = null
   }
 
   connectedCallback () {
@@ -118,15 +147,16 @@ export class LitDesk extends LitElement {
 
   firstUpdated () {
     const templateCard = this.querySelector('[slot="template-card"]')
-    const pile = this.renderRoot.querySelector('.inner-container')
+    this.pile = this.renderRoot.querySelector('.card-container')
     if (templateCard) {
-      pile.querySelectorAll('[slot^="card-"]').forEach((el) => el.remove())
-      this.slotOrder.forEach((slotName, index) => {
+      this.pile.querySelectorAll('.card').forEach((el) => el.remove())
+      this.cardOrder.forEach((slotName, index) => {
         const clone = templateCard.cloneNode(true)
-        console.log('attribute ', slotName)
-        clone.setAttribute('slot', slotName)
-        clone.setAttribute('imageUrl', this.dataSource[index].imageUrl)
-        this.appendChild(clone)
+        clone.classList.add('card', slotName)
+        clone.setAttribute('data-index', index)
+        clone.setAttribute('imageUrl', this.dataSource[index]?.imageUrl || '')
+        clone.setAttribute('caption', slotName)
+        this.pile.appendChild(clone)
       })
       templateCard.remove()
     }
@@ -135,43 +165,53 @@ export class LitDesk extends LitElement {
   handleCardTiltFinished (event) {
     const direction = event.detail.direction
     if (direction === 'left') {
-      const movedCard = this.slotOrder.shift()
-      this.slotOrder.push(movedCard)
+      const movedCard = this.cardOrder.shift()
+      this.cardOrder.push(movedCard)
     } else if (direction === 'right') {
-      const movedCard = this.slotOrder.pop()
-      this.slotOrder.unshift(movedCard)
+      const movedCard = this.cardOrder.pop()
+      this.cardOrder.unshift(movedCard)
     }
     this.updateZIndices()
   }
 
   updateZIndices () {
-    this.slotOrder.forEach((slotName, index) => {
-      const slot = this.shadowRoot.querySelector(`slot[name="${slotName}"]`)
-      const [assignedElement] = slot.assignedElements()
-      if (assignedElement) {
-        assignedElement.style.zIndex = `${(this.slotOrder.length - 1) - index + 1}`
-      }
+    const cards = Array.from(this.pile.querySelectorAll('.card'))
+    if (cards.length !== this.cardOrder.length) {
+      console.warn('Mismatch between cards and cardOrder lengths.')
+      return
+    }
+    cards.forEach((card, index) => {
+      card.className = card.className.replace(/card-\d+/g, '').trim()
+      card.classList.add(this.cardOrder[index])
     })
   }
 
-  sendToBack () {
-    const slot = this.shadowRoot.querySelector(`slot[name="${this.slotOrder[0]}"]`)
-    if (slot) {
-      const [card1] = slot.assignedElements()
-      if (card1 && typeof card1.tilt === 'function') {
-        card1.tilt('left')
-      }
+  tiltTopCard () {
+    const cards = Array.from(this.pile.querySelectorAll('.card'))
+    const topCard = cards.reduce((highest, card) => {
+      const zIndex = parseInt(window.getComputedStyle(card).zIndex || '0', 10)
+      return zIndex > highest.zIndex ? { card, zIndex } : highest
+    }, { card: null, zIndex: -Infinity }).card
+    if (topCard && typeof topCard.tilt === 'function') {
+      topCard.tilt('left')
+    } else {
+      console.warn('Top card does not have a tilt function or was not found')
     }
   }
 
-  sendToFront () {
-    const lastSlotName = this.slotOrder[this.slotOrder.length - 1]
-    const slot = this.shadowRoot.querySelector(`slot[name="${lastSlotName}"]`)
-    if (slot) {
-      const [lastCard] = slot.assignedElements()
-      if (lastCard && typeof lastCard.tilt === 'function') {
-        lastCard.tilt('right')
-      }
+  tiltBottomCard () {
+    // check
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce
+    const cards = Array.from(this.pile.querySelectorAll('.card'))
+    const bottomCard = cards.reduce((lowest, card) => {
+      const zIndex = parseInt(window.getComputedStyle(card).zIndex || '0', 10)
+      return zIndex < lowest.zIndex ? { card, zIndex } : lowest
+    }, { card: null, zIndex: Infinity }).card
+
+    if (bottomCard && typeof bottomCard.tilt === 'function') {
+      bottomCard.tilt('right')
+    } else {
+      console.warn('Bottom card does not have a tilt function or was not found')
     }
   }
 
@@ -225,18 +265,14 @@ export class LitDesk extends LitElement {
         <div class="inner-container">
           <div
             class="left-click-area"
-            @click="${() => this.sendToBack()}"
+            @click="${() => this.tiltTopCard()}"
           >
           ${this.renderLeftIcon()}
           </div>
-          <div class="slot-container">
-            <slot name="card-1"></slot>
-            <slot name="card-2"></slot>
-            <slot name="card-3"></slot>
-          </div>
+          <div class="card-container"></div>
           <div
             class="right-click-area"
-            @click="${() => this.sendToFront()}"
+            @click="${() => this.tiltBottomCard()}"
           >
           ${this.renderRightIcon()}
           </div>
