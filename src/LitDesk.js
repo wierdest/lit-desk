@@ -153,9 +153,8 @@ export class LitDesk extends LitElement {
       this.cardOrder.forEach((slotName, index) => {
         const clone = templateCard.cloneNode(true)
         clone.classList.add('card', slotName)
-        clone.setAttribute('data-index', index)
         clone.setAttribute('imageUrl', this.dataSource[index]?.imageUrl || '')
-        clone.setAttribute('caption', slotName)
+        clone.setAttribute('caption', this.dataSource[index]?.caption + slotName)
         this.pile.appendChild(clone)
       })
       templateCard.remove()
@@ -265,14 +264,14 @@ export class LitDesk extends LitElement {
         <div class="inner-container">
           <div
             class="left-click-area"
-            @click="${() => this.tiltTopCard()}"
+            @click=${this.tiltTopCard}
           >
           ${this.renderLeftIcon()}
           </div>
           <div class="card-container"></div>
           <div
             class="right-click-area"
-            @click="${() => this.tiltBottomCard()}"
+            @click=${this.tiltBottomCard}
           >
           ${this.renderRightIcon()}
           </div>
