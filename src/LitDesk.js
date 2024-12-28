@@ -132,7 +132,10 @@ export class LitDesk extends LitElement {
   constructor () {
     super()
     this.cardOrder = ['card-3', 'card-2', 'card-1']
+    this.last = this.cardOrder[this.cardOrder.length - 1]
+    this.first = this.cardOrder[0]
     this.pile = null
+    this.currentIndex = 0
   }
 
   connectedCallback () {
@@ -171,6 +174,12 @@ export class LitDesk extends LitElement {
       this.cardOrder.unshift(movedCard)
     }
     this.updateZIndices()
+    if (this.first === this.cardOrder[0]) {
+      console.log('We are back at first!')
+    }
+    if (this.last === this.cardOrder[0]) {
+      console.log("We're at the last, let's load more items from the dataSource")
+    }
   }
 
   updateZIndices () {
@@ -187,15 +196,33 @@ export class LitDesk extends LitElement {
 
   tiltTopCard () {
     const cards = Array.from(this.pile.querySelectorAll('.card'))
-    const topCard = cards.reduce((highest, card) => {
-      const zIndex = parseInt(window.getComputedStyle(card).zIndex || '0', 10)
-      return zIndex > highest.zIndex ? { card, zIndex } : highest
-    }, { card: null, zIndex: -Infinity }).card
-    if (topCard && typeof topCard.tilt === 'function') {
-      topCard.tilt('left')
-    } else {
-      console.warn('Top card does not have a tilt function or was not found')
+    // before we tilt it, we need to check
+    const setChange = this.last === this.cardOrder[0]
+    if (setChange) {
+      console.log('We need to change to the next set before we go on!"')
+      const changeNextAndLastCards = () => {
+        this.currentIndex++
+        const nextData = this.dataSource[this.cardOrder.length * this.currentIndex]
+        cards[2].setAttribute('caption', nextData.caption + 'card ' + (this.cardOrder.length * this.currentIndex + 1))
+        cards[2].setAttribute('imageUrl', nextData.imageUrl)
+        const lastData = this.dataSource[this.cardOrder.length * this.currentIndex + 1]
+        cards[1].setAttribute('caption', lastData.caption + 'card ' + ((this.cardOrder.length * this.currentIndex + 1) + 1))
+        cards[1].setAttribute('imageUrl', lastData.imageUrl)
+      }
+      changeNextAndLastCards()
     }
+    const tilt = () => {
+      const topCard = cards.reduce((highest, card) => {
+        const zIndex = parseInt(window.getComputedStyle(card).zIndex || '0', 10)
+        return zIndex > highest.zIndex ? { card, zIndex } : highest
+      }, { card: null, zIndex: -Infinity }).card
+      if (topCard && typeof topCard.tilt === 'function') {
+        topCard.tilt('left')
+      } else {
+        console.warn('Top card does not have a tilt function or was not found')
+      }
+    }
+    return setChange ? setTimeout(tilt, 250) : tilt()
   }
 
   tiltBottomCard () {

@@ -26,9 +26,35 @@
  * console.log(data)
  */
 
-export function makeFakeJson (model, quantity) {
+export function makeFakeJson (model, quantity, indexBased) {
   let indexBeingGenerated = -1
-  const generateValue = (value) => {
+  const generateIndexBasedValue = (value) => {
+    if (typeof value === 'string') {
+      if (value.toLowerCase() === 'string') {
+        return `string index ${indexBeingGenerated}`
+      }
+      if (value.toLowerCase() === 'email') {
+        return `user ${indexBeingGenerated}@example.com`
+      }
+      if (value.startsWith('picsum')) {
+        const res = value.substring(6)
+        return `https://picsum.photos/id/${indexBeingGenerated}/${res}`
+      }
+      if (value.toLowerCase() === 'date') {
+        const epoch = new Date(0)
+        return new Date(epoch.getTime() + indexBeingGenerated * 86400000).toISOString()
+      }
+    } else if (typeof value === 'number') {
+      return indexBeingGenerated * 1000
+    } else if (typeof value === 'boolean') {
+      return indexBeingGenerated % 2 === 0
+    } else if (Array.isArray(value)) {
+      return indexBeingGenerated <= value.length - 1 ? value[indexBeingGenerated] : value[(value.length - 1) % indexBeingGenerated] 
+    } else if (typeof value === 'object' && value !== null) {
+      return generateObject(value, true)
+    }
+  }
+  const generateRandomValue = (value) => {
     if (typeof value === 'string') {
       if (value.toLowerCase() === 'string') {
         return Math.random().toString(36).substring(2, 10)
@@ -55,10 +81,10 @@ export function makeFakeJson (model, quantity) {
     return null
   }
 
-  const generateObject = (obj) => {
+  const generateObject = (obj, indexBased) => {
     const result = {}
     for (const key in obj) {
-      result[key] = generateValue(obj[key])
+      result[key] = indexBased ? generateIndexBasedValue(obj[key]) : generateRandomValue(obj[key])
     }
     return result
   }
@@ -66,7 +92,7 @@ export function makeFakeJson (model, quantity) {
   const fakeData = []
   for (let i = 0; i < quantity; i++) {
     indexBeingGenerated = i
-    fakeData.push(generateObject(model))
+    fakeData.push(generateObject(model, indexBased))
   }
   return fakeData
 }
