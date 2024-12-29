@@ -35,26 +35,23 @@
     import { makeFakeJson } from '../src/utils/fakeJsonMaker.js'
 
     const model = {
-      id: 'number',
+      id: 0,
       user: 'string',
       email: 'email',
       date: 'date',
       imageUrl: 'picsum400',
       caption: 'string',
-      label: 'string'
+      label: true
     }
 
-    const fakeDataSet = makeFakeJson(model, 10)
+    const fakeDataSet = makeFakeJson(model, 10, true)
     console.log('fake data set ', fakeDataSet)
     render(
       html`
         <lit-desk .dataSource="${fakeDataSet}">
           <lit-laroid
               slot="template-card"
-              imageUrl='https://picsum.photos/400'
-              caption='A cool moment!!'
-              label='A+!'
-          
+              data="${fakeDataSet[0]}"
           >
           <p>This content is in the card!</p>
           </lit-laroid>

@@ -125,19 +125,14 @@ export class LitLaroid extends LitElement {
   `
 
   static properties = {
-    imageUrl: { type: String },
-    caption: { type: String },
-    label: { type: String },
+    dataSource: { type: Object },
     flipped: { type: Boolean }
   }
 
   constructor () {
     super()
-    this.imageUrl = 'https://picsum.photos/400'
-    this.caption = 'A default caption'
     this.flipped = false
     this.tilted = ''
-    this.label = 'label'
   }
 
   tilt (direction) {
@@ -180,14 +175,14 @@ export class LitLaroid extends LitElement {
         aria-pressed="${this.flipped}"
       >
         <div class="polaroid">
-          <img src=${this.imageUrl} alt="Polaroid style card" />
-          <div class="caption">${this.caption}</div>
+          <img src=${this.dataSource?.imageUrl} alt="Polaroid style card" />
+          <div class="caption">${this.dataSource?.caption}</div>
           <div
             class="icon"
             tabindex="0"
             aria-label="Change classification option"
           >
-            ${this.label}
+            ${this.dataSource?.label}
           </div>
         </div>
         <div class="polaroid-back">

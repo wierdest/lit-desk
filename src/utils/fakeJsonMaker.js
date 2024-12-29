@@ -49,7 +49,7 @@ export function makeFakeJson (model, quantity, indexBased) {
     } else if (typeof value === 'boolean') {
       return indexBeingGenerated % 2 === 0
     } else if (Array.isArray(value)) {
-      return indexBeingGenerated <= value.length - 1 ? value[indexBeingGenerated] : value[(value.length - 1) % indexBeingGenerated] 
+      return indexBeingGenerated <= value.length - 1 ? value[indexBeingGenerated] : value[(value.length - 1) % indexBeingGenerated]
     } else if (typeof value === 'object' && value !== null) {
       return generateObject(value, true)
     }
