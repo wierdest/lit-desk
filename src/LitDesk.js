@@ -15,6 +15,7 @@ export class LitDesk extends LitElement {
       align-items: center;
       height: 100%;
       width: 100%;
+      max-width: var(--lit-desk-max-width, 700px)
     }
 
     .inner-container {
@@ -100,18 +101,6 @@ export class LitDesk extends LitElement {
       --verticalOffset: -198%;
       --horizontalOffset: 8%;
     }
-
-    .card-1 {
-      z-index: 3;
-    }
-
-    .card-2 {
-      z-index: 2;
-    }
-
-    .card-3 {
-      z-index: 1;
-    }
   `
 
   static properties = {
@@ -120,10 +109,8 @@ export class LitDesk extends LitElement {
 
   constructor () {
     super()
-    this.cardOrder = ['card-3', 'card-2', 'card-1']
+    this.cardOrder = [1, 2, 3]
     this.pile = null
-    // try a set based approach
-    this.dataIndex = 0
     this.setIndex = 1
   }
 
@@ -144,7 +131,8 @@ export class LitDesk extends LitElement {
       this.pile.querySelectorAll('.card').forEach((el) => el.remove())
       this.cardOrder.forEach((slotName, index) => {
         const clone = templateCard.cloneNode(true)
-        clone.classList.add('card', slotName)
+        clone.classList.add('card')
+        clone.style.zIndex = this.cardOrder[index]
         clone.dataSource = this.dataSource[this.cardOrder.length * this.setIndex - index - 1]
         this.pile.appendChild(clone)
       })
@@ -170,8 +158,6 @@ export class LitDesk extends LitElement {
       this.cardOrder.unshift(movedCard)
     }
     this.updateZIndices()
-    console.log('Data Index: ', this.dataIndex)
-    console.log('Set Index', this.setIndex)
   }
 
   updateZIndices () {
@@ -181,8 +167,7 @@ export class LitDesk extends LitElement {
       return
     }
     cards.forEach((card, index) => {
-      card.className = card.className.replace(/card-\d+/g, '').trim()
-      card.classList.add(this.cardOrder[index])
+      card.style.zIndex = this.cardOrder[index]
     })
   }
 
@@ -211,7 +196,6 @@ export class LitDesk extends LitElement {
     // check
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce
     const cards = Array.from(this.pile.querySelectorAll('.card'))
-    this.dataIndex = this.dataIndex > 0 ? this.dataIndex - 1 : 0
     const tilt = () => {
       const bottomCard = cards.reduce((lowest, card) => {
         const zIndex = parseInt(window.getComputedStyle(card).zIndex || '0', 10)

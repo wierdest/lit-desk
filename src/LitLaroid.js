@@ -10,7 +10,7 @@ export class LitLaroid extends LitElement {
       width: clamp(220px, var(--polaroid-width), 100%);
       perspective: 1000px;
     }
-
+  
     .polaroid-wrapper {
       position: relative;
       width: var(--polaroid-width);
@@ -151,6 +151,28 @@ export class LitLaroid extends LitElement {
     .rotate {
       animation: rotate 1.0s ease-in-out infinite;
     }
+
+    @keyframes shake {
+       0% {
+        transform: translate(0, 0);
+      }
+      25% {
+        transform: translate(0, 5px);
+      }
+      50% {
+        transform: translate(0, -5px);
+      }
+      75% {
+        transform: translate(-0, 5px);
+      }
+      100% {
+        transform: translate(0, 0);
+      }
+    }
+
+    .shake {
+      animation: shake 1.2s ease-in-out infinite;
+    }
   `
 
   static properties = {
@@ -225,7 +247,7 @@ export class LitLaroid extends LitElement {
       >
         <div class="polaroid">
           ${this.renderLoadingImageSvg()}
-          <div class="caption">Developing!</div>
+          <div class="caption shake">Developing!</div>
           <div
             class="icon rotate"
             tabindex="0"
