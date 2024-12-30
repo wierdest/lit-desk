@@ -123,7 +123,8 @@ export class LitDesk extends LitElement {
     this.cardOrder = ['card-3', 'card-2', 'card-1']
     this.pile = null
     // try a set based approach
-    this.currentSet = 0
+    this.dataIndex = 0
+    this.setIndex = 1
   }
 
   connectedCallback () {
@@ -144,11 +145,19 @@ export class LitDesk extends LitElement {
       this.cardOrder.forEach((slotName, index) => {
         const clone = templateCard.cloneNode(true)
         clone.classList.add('card', slotName)
-        clone.dataSource = this.dataSource[this.cardOrder.length - index]
+        clone.dataSource = this.dataSource[this.cardOrder.length * this.setIndex - index - 1]
         this.pile.appendChild(clone)
       })
       templateCard.remove()
     }
+  }
+
+  setStackContent () {
+    const cards = Array.from(this.pile.querySelectorAll('.card'))
+    this.cardOrder.forEach((slotName, index) => {
+      const card = cards[index]
+      card.dataSource = this.dataSource[this.cardOrder.length * this.setIndex - index - 1]
+    })
   }
 
   handleCardTiltFinished (event) {
@@ -161,7 +170,8 @@ export class LitDesk extends LitElement {
       this.cardOrder.unshift(movedCard)
     }
     this.updateZIndices()
-    console.log('Current Set of Content: ', this.currentSet)
+    console.log('Data Index: ', this.dataIndex)
+    console.log('Set Index', this.setIndex)
   }
 
   updateZIndices () {
@@ -176,9 +186,13 @@ export class LitDesk extends LitElement {
     })
   }
 
+  forward () {
+    this.setIndex += 1
+    this.setStackContent()
+  }
+
   tiltTopCard () {
     const cards = Array.from(this.pile.querySelectorAll('.card'))
-    this.currentSet = this.currentSet + 1
     const tilt = () => {
       const topCard = cards.reduce((highest, card) => {
         const zIndex = parseInt(window.getComputedStyle(card).zIndex || '0', 10)
@@ -190,14 +204,14 @@ export class LitDesk extends LitElement {
         console.warn('Top card does not have a tilt function or was not found')
       }
     }
-    return this.setChange ? setTimeout(tilt, 250) : tilt()
+    return tilt()
   }
 
   tiltBottomCard () {
     // check
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce
     const cards = Array.from(this.pile.querySelectorAll('.card'))
-    this.currentSet = this.currentSet > 0 ? this.currentSet - 1 : 0
+    this.dataIndex = this.dataIndex > 0 ? this.dataIndex - 1 : 0
     const tilt = () => {
       const bottomCard = cards.reduce((lowest, card) => {
         const zIndex = parseInt(window.getComputedStyle(card).zIndex || '0', 10)
@@ -212,7 +226,31 @@ export class LitDesk extends LitElement {
     return tilt()
   }
 
-  renderLeftIcon () {
+  renderForward () {
+    return html`
+        <svg
+          width="64px"
+          height="64px"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M14.554 3.9974L19.2301 8.13188C21.0767 9.76455 22 10.5809 22 11.6325C22 12.6842 21.0767 13.5005 19.2301 15.1332L14.554
+            19.2677C13.7111 20.0129 13.2897 20.3856 12.9422 20.2303C12.5947 20.0751 12.5947 19.5143 12.5947 18.3925V15.6472C8.35683 
+            15.6472 3.76579 17.6545 2 21C2 10.2943 8.27835 7.61792 12.5947 7.61792V4.87257C12.5947 3.75082 12.5947 3.18995 12.9422 
+            3.03474C13.2897 2.87953 13.7111 3.25215 14.554 3.9974Z"
+            transform="scale(-1, 1) translate(-24, 0)"
+            stroke="#000000"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      `
+  }
+
+  renderNextIcon () {
     return html`
       <svg
         fill="#000000"
@@ -234,7 +272,7 @@ export class LitDesk extends LitElement {
     `
   }
 
-  renderRightIcon () {
+  renderPreviousIcon () {
     return html`
       <svg 
         fill="#000000"
@@ -256,22 +294,57 @@ export class LitDesk extends LitElement {
     `
   }
 
+  renderBackward () {
+    return html`
+        <svg
+          width="64px"
+          height="64px"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M14.554 3.9974L19.2301 8.13188C21.0767 9.76455 22 10.5809 22 11.6325C22 12.6842 21.0767 13.5005 19.2301 15.1332L14.554
+            19.2677C13.7111 20.0129 13.2897 20.3856 12.9422 20.2303C12.5947 20.0751 12.5947 19.5143 12.5947 18.3925V15.6472C8.35683 
+            15.6472 3.76579 17.6545 2 21C2 10.2943 8.27835 7.61792 12.5947 7.61792V4.87257C12.5947 3.75082 12.5947 3.18995 12.9422 
+            3.03474C13.2897 2.87953 13.7111 3.25215 14.554 3.9974Z"
+            transform="scale(1, -1) translate(0, -24)"
+            stroke="#000000"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      `
+  }
+
   render () {
     return html`
      <div class="container">
         <div class="inner-container">
+          <div 
+            class="left-click-area"
+            @click=${this.forward}
+          >
+          ${this.renderForward()}
+          </div>
           <div
             class="left-click-area"
             @click=${this.tiltTopCard}
           >
-          ${this.renderLeftIcon()}
+          ${this.renderNextIcon()}
           </div>
           <div class="card-container"></div>
           <div
             class="right-click-area"
             @click=${this.tiltBottomCard}
           >
-          ${this.renderRightIcon()}
+          ${this.renderPreviousIcon()}
+          </div>
+         <div 
+            class="left-click-area"
+          >
+          ${this.renderBackward()}
           </div>
         </div>
       </div>

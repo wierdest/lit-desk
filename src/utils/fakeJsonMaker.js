@@ -14,10 +14,10 @@
  * @returns {Object[]} Um array de objetos JSON que segue a estrutura definida no modelo.
  * @example
  * const model = {
- *   id: 'number',
+ *   id: 0,
  *   name: 'string',
  *   email: 'email',
- *   active: 'boolean',
+ *   active: true,
  *   createdAt: 'date',
  *   photo: 'picsum400',
  *   role: ['admin', 'user', 'guest']
